@@ -1,0 +1,8 @@
+module.exports = {
+  "/api": {
+    target: "http://backend:5000",
+    secure: false,
+    changeOrigin: true,
+    logLevel: "debug"
+  }
+};

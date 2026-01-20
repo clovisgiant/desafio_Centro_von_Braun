@@ -1,0 +1,134 @@
+<!-- Arquivo para testar a API via VS Code REST Client -->
+
+### 1. Verificar saúde do Backend
+GET http://localhost:5000/health
+Accept: application/json
+
+###
+
+### 2. Verificar saúde do Device Agent
+GET http://localhost:8000/api/health
+Accept: application/json
+
+###
+
+### 3. Login como Admin
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+
+###
+
+### 4. Validar Token
+POST http://localhost:5000/api/auth/validate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+###
+
+### 5. Listar Dispositivos
+GET http://localhost:5000/api/device
+Authorization: Bearer {{token}}
+
+###
+
+### 6. Obter Detalhes - Sensor de Solo
+GET http://localhost:5000/api/device/sensor-soil-001
+Authorization: Bearer {{token}}
+
+###
+
+### 7. Obter Detalhes - Estação Meteorológica
+GET http://localhost:5000/api/device/sensor-weather-001
+Authorization: Bearer {{token}}
+
+###
+
+### 8. Obter Detalhes - Sistema de Irrigação
+GET http://localhost:5000/api/device/irrigation-system-001
+Authorization: Bearer {{token}}
+
+###
+
+### 9. Executar Comando - Ler Umidade
+POST http://localhost:5000/api/device/sensor-soil-001/execute
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "operation": "READ_HUMIDITY",
+  "parameters": {
+    "sensor_type": "humidity"
+  }
+}
+
+###
+
+### 10. Executar Comando - Definir Limiar
+POST http://localhost:5000/api/device/sensor-soil-001/execute
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "operation": "SET_THRESHOLD",
+  "parameters": {
+    "threshold": "65",
+    "unit": "percent"
+  }
+}
+
+###
+
+### 11. Executar Comando - Ler Temperatura
+POST http://localhost:5000/api/device/sensor-weather-001/execute
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "operation": "READ_TEMPERATURE",
+  "parameters": {}
+}
+
+###
+
+### 12. Criar novo Dispositivo
+POST http://localhost:5000/api/device
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "identifier": "sensor-test-001",
+  "description": "Sensor de teste",
+  "manufacturer": "TestCorp",
+  "url": "telnet://192.168.1.200:23",
+  "commands": []
+}
+
+###
+
+### 13. Atualizar Dispositivo
+PUT http://localhost:5000/api/device/sensor-test-001
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "identifier": "sensor-test-001",
+  "description": "Sensor de teste atualizado",
+  "manufacturer": "TestCorp Updated",
+  "url": "telnet://192.168.1.200:23",
+  "commands": []
+}
+
+###
+
+### 14. Deletar Dispositivo
+DELETE http://localhost:5000/api/device/sensor-test-001
+Authorization: Bearer {{token}}
+
+###

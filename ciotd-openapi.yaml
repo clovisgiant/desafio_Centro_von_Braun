@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: Community IoT Device (CIoTD)
+  description: |
+    A CIoTD é uma plataforma colaborativa para compartilhamento de acesso a dados de dispositivos IoT.
+    Através dela, colaboradores podem cadastrar seus dispositivos, permitindo que qualquer pessoa possa
+    coletar os dados desses dispositivos e utilizar em suas aplicações.
+  version: 1.0.0
+  contact: {}
+tags:
+  - name: Devices
+    description: Provê operações para cadastramento e gerenciamento de dispositivos
+paths:
+  /device:
+    get:
+      summary: Retorna uma lista contendo os identificadores dos dispositivos cadastrados na plataforma
+      tags: [Devices]
+      responses:
+        '200':
+          description: Requisição executada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceList'
+        '401':
+          description: As credenciais fornecidas pelo usuário são inexistentes ou inválidas
+    post:
+      summary: Cadadastra um novo dispositivo na plataforma
+      tags: [Devices]
+      requestBody:
+        description: Detalhes do dispositivo sendo cadastrados
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+      responses:
+        '201':
+          description: Requisição realizada com sucesso
+          headers:
+            Location:
+              description: URL de acesso aos dados dispositivo recém cadastrado
+              schema:
+                type: string
+  /device/{id}:
+    get:
+      summary: Retorna os detalhes de um dispositivo
+      tags: [Devices]
+      parameters:
+        - name: id
+          in: path
+          description: Identificador do dispositivo para o qual os detalhes devem ser retornados
+          required: true
+          schema:
+            type: string
+            format: byte
+      responses:
+        '200':
+          description: Requisição realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '404':
+          description: Dispositivo não encontrado
+    put:
+      summary: Atualiza os dados de um dispositivo
+      tags: [Devices]
+      parameters:
+        - name: id
+          in: path
+          description: Identificador do dispositivo para o qual os detalhes devem ser atualizados
+          required: true
+          schema:
+            type: string
+            format: byte
+      responses:
+        '200':
+          description: Requisição realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: A solicitação não foi realizada pelo proprietário do dispositivo
+        '404':
+          description: Dispositivo não encontrado
+    delete:
+      summary: Remove os detalhes de um dispositivo
+      tags: [Devices]
+      parameters:
+        - name: id
+          in: path
+          description: Identificador do dispositivo para o qual os detalhes devem ser removidos
+          required: true
+          schema:
+            type: string
+            format: byte
+      responses:
+        '200':
+          description: Requisição realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '401':
+          description: A solicitação não foi realizada pelo proprietário do dispositivo
+        '404':
+          description: Dispositivo não encontrado
+      security:
+        - basichAuth: []
+components:
+  securitySchemes:
+    basichAuth:
+      type: http
+      scheme: basic
+  schemas:
+    Command:
+      type: object
+      properties:
+        command:
+          type: string
+          description: Sequencia de bytes enviados para execução do comando
+        parameters:
+          type: array
+          description: Lista de parâmetros aceitas pelo comando
+          items:
+            $ref: '#/components/schemas/Parameter'
+    CommandDescription:
+      type: object
+      properties:
+        operation:
+          type: string
+          description: Nome da operação executada pelo dispositivo
+        description:
+          type: string
+          description: Descrição e detalhes adicionais sobre a operação e/ou o comando
+        command:
+          $ref: '#/components/schemas/Command'
+        result:
+          type: string
+          description: Descrição do resultado esperado da execução do comando
+        format:
+          type: string
+          description: Definição, usando o padrão OpenAPI para especificação de schemas de dados, do formato dos dados retornados pelo comando.
+    Device:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: Identificador do dispositivo
+        description:
+          type: string
+          description: Descrição do dispositivo, incluindo detalhes do seu uso e das informações geradas
+        manufacturer:
+          type: string
+          description: Nome do fabricante do dispositivo
+        url:
+          type: string
+          description: URL de acesso ao dispositivo
+        commands:
+          type: array
+          description: Lista de comandos disponibilizada pelo dispositivo
+          items:
+            $ref: '#/components/schemas/CommandDescription'
+    DeviceList:
+      type: array
+      items:
+        type: string
+        description: Identificador do dispositivo
+    Parameter:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nome do parâmetro
+        description:
+          type: string
+          description: Descrição do parâmetro, incluindo detalhes de sua utilização, valores possíveis e funcionamento esperado da operação de acordo com esses valores

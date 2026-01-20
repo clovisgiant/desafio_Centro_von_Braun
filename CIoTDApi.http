@@ -1,0 +1,273 @@
+# API Testing Guide - CIoTD Integration
+
+Arquivo de testes rápidos para validar a API completa.
+
+## Coleta HTTP - Para usar no VS Code Extension
+
+```http
+### 1. Health Check - Backend
+GET http://localhost:5000/health
+
+###
+
+### 2. Health Check - Device Agent
+GET http://localhost:8000/api/health
+
+###
+
+### 3. Login - Admin
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+###
+
+### 4. Login - Technician
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "technician",
+  "password": "tech456"
+}
+
+###
+
+### 5. Validate Token
+POST http://localhost:5000/api/auth/validate
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+###
+
+### 6. List All Devices
+GET http://localhost:5000/api/device
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 7. Get Device Details - Soil Sensor
+GET http://localhost:5000/api/device/sensor-soil-001
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 8. Get Device Details - Weather Station
+GET http://localhost:5000/api/device/sensor-weather-001
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 9. Get Device Details - Irrigation System
+GET http://localhost:5000/api/device/irrigation-system-001
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 10. Execute Command - Read Soil Humidity
+POST http://localhost:5000/api/device/sensor-soil-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "READ_HUMIDITY",
+  "parameters": {
+    "sensor_type": "humidity"
+  }
+}
+
+###
+
+### 11. Execute Command - Set Soil Threshold
+POST http://localhost:5000/api/device/sensor-soil-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "SET_THRESHOLD",
+  "parameters": {
+    "threshold": "60",
+    "unit": "percent"
+  }
+}
+
+###
+
+### 12. Execute Command - Read Temperature
+POST http://localhost:5000/api/device/sensor-weather-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "READ_TEMPERATURE",
+  "parameters": {}
+}
+
+###
+
+### 13. Execute Command - Read Humidity (Weather)
+POST http://localhost:5000/api/device/sensor-weather-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "READ_HUMIDITY",
+  "parameters": {}
+}
+
+###
+
+### 14. Execute Command - Read Rainfall
+POST http://localhost:5000/api/device/sensor-weather-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "READ_RAINFALL",
+  "parameters": {
+    "period": "day"
+  }
+}
+
+###
+
+### 15. Execute Command - Start Irrigation
+POST http://localhost:5000/api/device/irrigation-system-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "START_IRRIGATION",
+  "parameters": {
+    "zone": "1",
+    "duration": "30"
+  }
+}
+
+###
+
+### 16. Execute Command - Stop Irrigation
+POST http://localhost:5000/api/device/irrigation-system-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "STOP_IRRIGATION",
+  "parameters": {
+    "zone": "1"
+  }
+}
+
+###
+
+### 17. Execute Command - Get Zone Status
+POST http://localhost:5000/api/device/irrigation-system-001/execute
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "operation": "GET_ZONE_STATUS",
+  "parameters": {
+    "zone": "1"
+  }
+}
+
+###
+
+### 18. Create New Device
+POST http://localhost:5000/api/device
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "identifier": "sensor-new-001",
+  "description": "Novo sensor de teste",
+  "manufacturer": "TestCorp",
+  "url": "telnet://192.168.1.150:23",
+  "commands": []
+}
+
+###
+
+### 19. Update Device
+PUT http://localhost:5000/api/device/sensor-new-001
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "identifier": "sensor-new-001",
+  "description": "Sensor atualizado",
+  "manufacturer": "TestCorp Updated",
+  "url": "telnet://192.168.1.150:23",
+  "commands": []
+}
+
+###
+
+### 20. Delete Device
+DELETE http://localhost:5000/api/device/sensor-new-001
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+```
+
+## Passos para Testar
+
+1. **Inicie o Docker Compose:**
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Aguarde inicialização (30 segundos)**
+
+3. **Abra o arquivo CIoTDApi.http no VS Code**
+
+4. **Execute os testes na ordem:**
+   - Health checks (1-2)
+   - Login (3-4)
+   - Copie o token retornado
+   - Substitua `YOUR_TOKEN_HERE` em todas as requisições
+   - Teste endpoints de listagem (6-8)
+   - Teste execução de comandos (10-17)
+   - Teste CRUD de dispositivos (18-20)
+
+## Resultados Esperados
+
+### Sucesso de Login
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer",
+  "expiresIn": 3600,
+  "userName": "admin"
+}
+```
+
+### Sucesso na Listagem
+```json
+[
+  "sensor-soil-001",
+  "sensor-weather-001",
+  "irrigation-system-001"
+]
+```
+
+### Sucesso na Execução
+```json
+{
+  "success": true,
+  "data": "75.5",
+  "error": null,
+  "executionTimeMs": 245
+}
+```
+
+## Troubleshooting
+
+- Se o token expirou, faça login novamente
+- Se houver erro de conexão, verifique se Docker está rodando
+- Para ver logs: `docker-compose logs -f backend` ou `docker-compose logs -f device-agent`

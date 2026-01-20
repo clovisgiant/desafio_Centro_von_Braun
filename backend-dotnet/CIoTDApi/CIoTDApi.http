@@ -1,0 +1,6 @@
+@CIoTDApi_HostAddress = http://localhost:5141
+
+GET {{CIoTDApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
