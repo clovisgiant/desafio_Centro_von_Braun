@@ -138,13 +138,25 @@ public class DeviceController : ControllerBase
             "Executando comando no dispositivo {DeviceId}: operação {Operation}",
             id, request.Operation);
 
+        // Parse do URL telnet (ex: telnet://192.168.1.100:23)
+        var uri = new Uri(device.Url);
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 23; // Default Telnet port
+
         // Executa o comando via Device Agent
         var result = await _deviceAgentService.ExecuteCommandAsync(
-            id,
-            request.Operation,
-            request.Parameters,
-            cancellationToken);
+            deviceId: id,
+            deviceHost: host,
+            devicePort: port,
+            command: command.Command.Command,
+            parameters: request.Parameters,
+            cancellationToken: cancellationToken);
 
-        return Ok(result);
+        return Ok(new CommandExecutionResultDto
+        {
+            Success = result.Success,
+            Response = result.Response,
+            Error = result.Error
+        });
     }
 }
