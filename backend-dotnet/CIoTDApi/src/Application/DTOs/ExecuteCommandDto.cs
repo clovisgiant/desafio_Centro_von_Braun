@@ -1,48 +1,39 @@
+using System.Text.Json.Serialization;
+
 namespace CIoTDApi.Application.DTOs;
 
 /// <summary>
-/// Requisição para execução de um comando em um dispositivo
+/// Request para executar comando em dispositivo via Agent
 /// </summary>
-public class ExecuteCommandDto
+public class ExecuteCommandRequest
 {
-    /// <summary>
-    /// Identificador do dispositivo
-    /// </summary>
+    [JsonPropertyName("device_id")]
     public string DeviceId { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Nome da operação a executar
-    /// </summary>
-    public string Operation { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Dicionário de parâmetros (nome -> valor)
-    /// </summary>
-    public Dictionary<string, string> Parameters { get; set; } = new();
+    
+    [JsonPropertyName("device_host")]
+    public string DeviceHost { get; set; } = string.Empty;
+    
+    [JsonPropertyName("device_port")]
+    public int DevicePort { get; set; }
+    
+    [JsonPropertyName("command")]
+    public string Command { get; set; } = string.Empty;
+    
+    [JsonPropertyName("parameters")]
+    public Dictionary<string, object> Parameters { get; set; } = new();
 }
 
 /// <summary>
-/// Resposta da execução de um comando
+/// Response da execução de comando via Agent
 /// </summary>
-public class CommandExecutionResultDto
+public class ExecuteCommandResponse
 {
-    /// <summary>
-    /// Indica se a execução foi bem-sucedida
-    /// </summary>
+    [JsonPropertyName("success")]
     public bool Success { get; set; }
-
-    /// <summary>
-    /// Dados retornados pelo dispositivo
-    /// </summary>
-    public string? Data { get; set; }
-
-    /// <summary>
-    /// Mensagem de erro (se houver)
-    /// </summary>
+    
+    [JsonPropertyName("response")]
+    public string? Response { get; set; }
+    
+    [JsonPropertyName("error")]
     public string? Error { get; set; }
-
-    /// <summary>
-    /// Tempo de execução em milissegundos
-    /// </summary>
-    public long ExecutionTimeMs { get; set; }
 }

@@ -1,117 +1,104 @@
+using System.Text.Json;
 using CIoTDApi.Application.DTOs;
 using CIoTDApi.Application.Interfaces;
 
 namespace CIoTDApi.Infrastructure.Http;
 
 /// <summary>
-/// Implementação do serviço que se comunica com o Device Agent Python
+/// Implementação do serviço que comunica com o Device Agent Python
 /// </summary>
 public class DeviceAgentService : IDeviceAgentService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<DeviceAgentService> _logger;
-    private readonly string _deviceAgentBaseUrl;
+    private readonly string _agentUrl;
 
-    public DeviceAgentService(HttpClient httpClient, IConfiguration configuration, ILogger<DeviceAgentService> logger)
+    public DeviceAgentService(
+        HttpClient httpClient,
+        IConfiguration configuration,
+        ILogger<DeviceAgentService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
-        _deviceAgentBaseUrl = configuration["DeviceAgent:BaseUrl"] ?? "http://localhost:8000";
+        _agentUrl = configuration["DEVICE_AGENT_URL"] ?? "http://localhost:8001";
+        
+        _logger.LogInformation("Device Agent URL configurada: {Url}", _agentUrl);
     }
 
     public async Task<CommandExecutionResultDto> ExecuteCommandAsync(
         string deviceId,
-        string operation,
-        Dictionary<string, string> parameters,
+        string deviceHost,
+        int devicePort,
+        string command,
+        Dictionary<string, object> parameters,
         CancellationToken cancellationToken = default)
     {
-        var startTime = DateTime.UtcNow;
+        var request = new ExecuteCommandRequest
+        {
+            DeviceId = deviceId,
+            DeviceHost = deviceHost,
+            DevicePort = devicePort,
+            Command = command,
+            Parameters = parameters
+        };
+
+        _logger.LogInformation(
+            "Enviando comando {Command} para dispositivo {DeviceId} em {Host}:{Port} via Agent",
+            command, deviceId, deviceHost, devicePort
+        );
 
         try
         {
-            // Constrói a URL do endpoint do Device Agent
-            var url = $"{_deviceAgentBaseUrl}/api/execute";
+            var response = await _httpClient.PostAsJsonAsync(
+                $"{_agentUrl}/api/execute",
+                request,
+                cancellationToken
+            );
 
-            // Prepara o payload
-            var payload = new
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ExecuteCommandResponse>(
+                cancellationToken: cancellationToken
+            );
+
+            if (result == null)
             {
-                device_id = deviceId,
-                operation = operation,
-                parameters = parameters
-            };
-
-            // Serializa para JSON
-            var content = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(payload),
-                System.Text.Encoding.UTF8,
-                "application/json");
-
-            _logger.LogInformation(
-                "Enviando comando para Device Agent: device={DeviceId}, operation={Operation}",
-                deviceId, operation);
-
-            // Faz a requisição
-            var response = await _httpClient.PostAsync(url, content, cancellationToken);
-
-            var executionTime = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogError(
-                    "Erro ao executar comando no Device Agent: {StatusCode} - {ErrorContent}",
-                    response.StatusCode, errorContent);
-
+                _logger.LogError("Resposta nula do Agent para comando {Command}", command);
                 return new CommandExecutionResultDto
                 {
                     Success = false,
-                    Error = $"Device Agent retornou {response.StatusCode}: {errorContent}",
-                    ExecutionTimeMs = executionTime
+                    Error = "Resposta nula do Agent"
                 };
             }
 
-            // Processa a resposta
-            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            var result = System.Text.Json.JsonSerializer.Deserialize<CommandExecutionResultDto>(responseContent);
-
-            if (result != null)
-            {
-                result.ExecutionTimeMs = executionTime;
-                _logger.LogInformation(
-                    "Comando executado com sucesso em {ExecutionTime}ms",
-                    executionTime);
-                return result;
-            }
+            _logger.LogInformation(
+                "Comando {Command} executado - Success: {Success}",
+                command, result.Success
+            );
 
             return new CommandExecutionResultDto
             {
-                Success = false,
-                Error = "Resposta inválida do Device Agent",
-                ExecutionTimeMs = executionTime
+                Success = result.Success,
+                Response = result.Response,
+                Error = result.Error
             };
         }
         catch (HttpRequestException ex)
         {
-            var executionTime = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
-            _logger.LogError(ex, "Erro de comunicação com Device Agent");
-
+            _logger.LogError(ex, "Erro ao comunicar com Device Agent: {Message}", ex.Message);
             return new CommandExecutionResultDto
             {
                 Success = false,
-                Error = $"Falha na comunicação com Device Agent: {ex.Message}",
-                ExecutionTimeMs = executionTime
+                Error = $"Erro ao comunicar com Agent: {ex.Message}"
             };
         }
         catch (Exception ex)
         {
-            var executionTime = (long)(DateTime.UtcNow - startTime).TotalMilliseconds;
-            _logger.LogError(ex, "Erro inesperado ao executar comando");
-
+            _logger.LogError(ex, "Erro inesperado ao executar comando: {Message}", ex.Message);
             return new CommandExecutionResultDto
             {
                 Success = false,
-                Error = $"Erro inesperado: {ex.Message}",
-                ExecutionTimeMs = executionTime
+                Error = $"Erro inesperado: {ex.Message}"
             };
         }
     }

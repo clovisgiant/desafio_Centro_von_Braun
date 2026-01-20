@@ -1,0 +1,21 @@
+<div class="container">
+  <div class="header">
+    <h1>Dispositivos CIoTD</h1>
+    <button class="logout-btn" (click)="logout()">Sair</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Carregando dispositivos...</div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <div class="device-grid">
+    <div
+      *ngFor="let device of devices"
+      class="device-card"
+      (click)="selectDevice(device)"
+    >
+      <h3>{{ device }}</h3>
+      <p>ID: {{ device }}</p>
+    </div>
+  </div>
+</div>

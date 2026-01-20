@@ -12,7 +12,9 @@ public interface IDeviceAgentService
     /// </summary>
     Task<CommandExecutionResultDto> ExecuteCommandAsync(
         string deviceId,
-        string operation,
-        Dictionary<string, string> parameters,
+        string deviceHost,
+        int devicePort,
+        string command,
+        Dictionary<string, object> parameters,
         CancellationToken cancellationToken = default);
 }

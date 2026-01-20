@@ -1,0 +1,57 @@
+<div class="container" *ngIf="!loading">
+  <div class="back-button">
+    <button (click)="back()"> Voltar</button>
+  </div>
+
+  <div *ngIf="device" class="device-info">
+    <h1>{{ device.name }}</h1>
+    <p class="device-id">ID: {{ device.id }}</p>
+    <p class="device-location">
+      Localização:
+      {{ device.location || 'Não informada' }}
+    </p>
+  </div>
+
+  <div class="command-panel">
+    <h2>Executar Comando</h2>
+
+    <div class="form-group">
+      <label>Comando:</label>
+      <input
+        [(ngModel)]="command"
+        type="text"
+        placeholder="ex: GET, SET, STATUS"
+      />
+    </div>
+
+    <div class="form-group">
+      <label>Parâmetros (separados por espaço):</label>
+      <input
+        [(ngModel)]="parameters"
+        type="text"
+        placeholder="ex: param1 param2 param3"
+      />
+    </div>
+
+    <button
+      class="execute-btn"
+      (click)="executeCommand()"
+      [disabled]="!command || executing"
+    >
+      {{ executing ? 'Executando...' : 'Executar' }}
+    </button>
+  </div>
+
+  <div *ngIf="result" class="result success">
+    <h3>Resultado:</h3>
+    <p>{{ result }}</p>
+  </div>
+
+  <div *ngIf="resultError" class="result error">
+    <h3>Erro:</h3>
+    <p>{{ resultError }}</p>
+  </div>
+</div>
+
+<div class="loading" *ngIf="loading">Carregando...</div>
+<div class="error" *ngIf="error">{{ error }}</div>

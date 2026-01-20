@@ -7,6 +7,18 @@
     command: bash -lc "dotnet restore && dotnet run --urls http://0.0.0.0:5000"
     ports:
       - "5001:5000"
+    environment:
+      - DEVICE_AGENT_URL=http://device-agent:8000
+
+  device-agent:
+    build: ./device-agent
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   frontend:
     image: node:20
@@ -25,4 +37,3 @@
 networks:
   default:
     name: ciotd-net
-

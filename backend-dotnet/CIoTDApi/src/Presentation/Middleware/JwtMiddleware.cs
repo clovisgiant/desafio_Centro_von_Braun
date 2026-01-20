@@ -33,10 +33,7 @@ public class JwtMiddleware
             }
             else
             {
-                _logger.LogWarning("Token inválido recebido");
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsJsonAsync(new { message = "Token inválido ou expirado" });
-                return;
+                _logger.LogWarning("Token inválido recebido, continuando requisição");
             }
         }
 
