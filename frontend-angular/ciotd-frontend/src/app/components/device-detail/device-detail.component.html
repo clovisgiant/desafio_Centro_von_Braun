@@ -1,15 +1,38 @@
-<div class="container" *ngIf="!loading">
+<div class="loading" *ngIf="loading">Carregando...</div>
+
+<div class="error" *ngIf="error && !loading">
+  <p>{{ error }}</p>
+  <button (click)="back()">Voltar</button>
+</div>
+
+<div class="container" *ngIf="!loading && !error && device">
   <div class="back-button">
-    <button (click)="back()"> Voltar</button>
+    <button (click)="back()">← Voltar</button>
   </div>
 
-  <div *ngIf="device" class="device-info">
-    <h1>{{ device.name }}</h1>
-    <p class="device-id">ID: {{ device.id }}</p>
-    <p class="device-location">
-      Localização:
-      {{ device.location || 'Não informada' }}
+  <div class="device-info">
+    <h1>{{ device.description }}</h1>
+    <p class="device-id">ID: {{ device.identifier }}</p>
+    <p class="device-manufacturer">
+      Fabricante: {{ device.manufacturer }}
     </p>
+    <p class="device-url">
+      URL: {{ device.url }}
+    </p>
+    <p class="device-commands">
+      Comandos disponíveis: {{ device.commands.length }}
+    </p>
+  </div>
+
+  <div class="commands-available" *ngIf="device.commands && device.commands.length > 0">
+    <h2>Comandos Disponíveis</h2>
+    <div class="commands-list">
+      <div *ngFor="let cmd of device.commands" class="command-item" (click)="selectCommand(cmd)">
+        <strong>{{ cmd.operation }}</strong>
+        <p>{{ cmd.description }}</p>
+        <small>Resultado: {{ cmd.result }}</small>
+      </div>
+    </div>
   </div>
 
   <div class="command-panel">
@@ -36,7 +59,8 @@
     <button
       class="execute-btn"
       (click)="executeCommand()"
-      [disabled]="!command || executing"
+      [disabled]="!command || !device || executing"
+      [title]="!device ? 'Aguarde o carregamento do dispositivo' : (!command ? 'Digite um comando' : 'Executar comando')"
     >
       {{ executing ? 'Executando...' : 'Executar' }}
     </button>
@@ -52,6 +76,3 @@
     <p>{{ resultError }}</p>
   </div>
 </div>
-
-<div class="loading" *ngIf="loading">Carregando...</div>
-<div class="error" *ngIf="error">{{ error }}</div>

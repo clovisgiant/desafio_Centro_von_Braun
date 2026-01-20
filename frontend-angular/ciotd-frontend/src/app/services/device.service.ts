@@ -28,7 +28,10 @@ export class DeviceService {
   }
 
   getDevice(deviceId: string): Observable<Device> {
-    const url = `${environment.apiUrl}/device/${deviceId}`;
+    // Encode the deviceId to handle special characters
+    const encodedId = encodeURIComponent(deviceId);
+    const url = `${environment.apiUrl}/device/${encodedId}`;
+    console.log('Requesting device from URL:', url);
     return this.http.get<Device>(url, { headers: this.getHeaders() });
   }
 
@@ -37,8 +40,11 @@ export class DeviceService {
     operation: string,
     parameters: { [key: string]: any }
   ): Observable<ExecuteCommandResponse> {
-    const url = `${environment.apiUrl}/device/${deviceId}/execute`;
+    // Encode the deviceId to handle special characters
+    const encodedId = encodeURIComponent(deviceId);
+    const url = `${environment.apiUrl}/device/${encodedId}/execute`;
     const request: ExecuteCommandRequest = { operation, parameters };
+    console.log('Executing command on URL:', url, 'with request:', request);
     return this.http.post<ExecuteCommandResponse>(url, request, { headers: this.getHeaders() });
   }
 }

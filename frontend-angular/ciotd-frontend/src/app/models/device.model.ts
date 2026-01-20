@@ -1,7 +1,17 @@
+export interface DeviceCommand {
+  operation: string;
+  description: string;
+  command: any;
+  result: string;
+  format: any;
+}
+
 export interface Device {
-  id: string;
-  name: string;
-  location?: string;
+  identifier: string;
+  description: string;
+  manufacturer: string;
+  url: string;
+  commands: DeviceCommand[];
 }
 
 export interface ExecuteCommandRequest {

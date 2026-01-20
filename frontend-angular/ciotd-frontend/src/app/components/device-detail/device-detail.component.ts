@@ -29,31 +29,79 @@ export class DeviceDetailComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('DeviceDetailComponent initialized');
     this.route.params.subscribe((params) => {
       const deviceId = params["id"];
-      console.log("Device ID from route:", deviceId);
+      console.log("Device ID from route params:", deviceId);
+      console.log("All route params:", params);
+      
+      if (!deviceId) {
+        console.error('No device ID found in route params');
+        this.error = "ID do dispositivo não fornecido na URL";
+        this.loading = false;
+        return;
+      }
+      
       this.loadDevice(deviceId);
     });
   }
 
   loadDevice(deviceId: string) {
     console.log("Loading device:", deviceId);
+    this.loading = true;
+    this.error = "";
+    
     this.deviceService.getDevice(deviceId).subscribe({
       next: (device) => {
-        console.log("Device loaded:", device);
+        console.log("Device loaded - Raw response:", device);
+        console.log("Device type:", typeof device);
+        console.log("Device keys:", Object.keys(device || {}));
+        console.log("Device.identifier:", device?.identifier);
+        console.log("Device.description:", device?.description);
+        console.log("Device.manufacturer:", device?.manufacturer);
+        
         this.device = device;
+        console.log("this.device after assignment:", this.device);
+        console.log("this.device.identifier after assignment:", this.device?.identifier);
         this.loading = false;
       },
       error: (err) => {
         console.error("Error loading device:", err);
-        this.error = "Erro ao carregar dispositivo: " + err.message;
+        console.error("Error status:", err.status);
+        console.error("Error details:", err.error);
+        
+        let errorMessage = "Erro ao carregar dispositivo";
+        if (err.status === 404) {
+          errorMessage = `Dispositivo "${deviceId}" não encontrado`;
+        } else if (err.status === 401 || err.status === 403) {
+          errorMessage = "Não autorizado. Faça login novamente.";
+        } else if (err.error && err.error.message) {
+          errorMessage = err.error.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        this.error = errorMessage;
         this.loading = false;
       },
     });
   }
 
   executeCommand() {
-    if (!this.device || !this.command) return;
+    if (!this.device || !this.command) {
+      console.error('Cannot execute command: device or command is missing', {
+        device: this.device,
+        command: this.command
+      });
+      return;
+    }
+
+    const deviceId = this.device.identifier;
+    if (!deviceId) {
+      console.error('Device identifier is missing');
+      this.resultError = "Erro: ID do dispositivo não encontrado";
+      return;
+    }
 
     this.executing = true;
     this.result = "";
@@ -68,10 +116,17 @@ export class DeviceDetailComponent implements OnInit {
       });
     }
 
+    console.log('Executing command:', {
+      deviceId,
+      command: this.command,
+      parameters: paramPairs
+    });
+
     this.deviceService
-      .executeCommand(this.device!.id, this.command, paramPairs)
+      .executeCommand(deviceId, this.command, paramPairs)
       .subscribe({
         next: (response) => {
+          console.log('Command response:', response);
           if (response.success) {
             this.result = response.response || "Comando executado com sucesso";
           } else {
@@ -80,10 +135,19 @@ export class DeviceDetailComponent implements OnInit {
           this.executing = false;
         },
         error: (err) => {
-          this.resultError = "Erro: " + err.message;
+          console.error('Command execution error:', err);
+          this.resultError = "Erro: " + (err.error?.message || err.message || 'Erro desconhecido');
           this.executing = false;
         },
       });
+  }
+
+  selectCommand(cmd: any) {
+    this.command = cmd.operation;
+    this.parameters = "";
+    this.result = "";
+    this.resultError = "";
+    console.log('Comando selecionado:', cmd.operation);
   }
 
   back() {

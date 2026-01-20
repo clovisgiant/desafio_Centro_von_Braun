@@ -1,0 +1,199 @@
+<!-- =============================================== -->
+<!-- DEVICE-DETAIL.COMPONENT.HTML - CÓDIGO CORRETO -->
+<!-- =============================================== -->
+<!-- Copie TUDO isto e cole no seu arquivo: -->
+<!-- frontend-angular/ciotd-frontend/src/app/components/device-detail/device-detail.component.html -->
+
+<div class="device-detail-container">
+  <h1>Detalhes do Dispositivo</h1>
+
+  <!-- Exibir ID capturado da rota -->
+  <p class="device-id">
+    <strong>ID do Dispositivo:</strong> {{ deviceId || 'Não encontrado' }}
+  </p>
+
+  <!-- Mensagens de erro e sucesso -->
+  <div *ngIf="errorMessage" class="error-box">
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <div *ngIf="successMessage" class="success-box">
+    <p>{{ successMessage }}</p>
+  </div>
+
+  <!-- Detalhes do dispositivo -->
+  <div *ngIf="device" class="device-info">
+    <p><strong>Nome:</strong> {{ device.identifier }}</p>
+    <p><strong>Descrição:</strong> {{ device.description }}</p>
+    <p><strong>Fabricante:</strong> {{ device.manufacturer }}</p>
+    <p><strong>URL:</strong> {{ device.url }}</p>
+
+    <!-- Seção de Execução de Comando -->
+    <div class="execute-section">
+      <h2>Executar Comando</h2>
+
+      <!-- Select de operações -->
+      <div class="form-group">
+        <label for="operation">Operação:</label>
+        <select
+          id="operation"
+          [(ngModel)]="selectedOperation"
+          (change)="onOperationChange(selectedOperation)"
+        >
+          <option value="">-- Selecione uma operação --</option>
+          <option *ngFor="let cmd of device.commands" value="{{ cmd.operation }}">
+            {{ cmd.operation }} - {{ cmd.description }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Inputs dinâmicos para parâmetros -->
+      <div *ngIf="selectedOperation && device" class="parameters-section">
+        <h3>Parâmetros</h3>
+        <div *ngFor="let cmd of device.commands">
+          <div *ngIf="cmd.operation === selectedOperation && cmd.command.parameters">
+            <div *ngFor="let param of cmd.command.parameters" class="form-group">
+              <label for="param_{{ param.name }}">
+                {{ param.name }}:
+              </label>
+              <input
+                id="param_{{ param.name }}"
+                type="text"
+                [(ngModel)]="parameters[param.name]"
+                (change)="onParameterChange(param.name, parameters[param.name])"
+                placeholder="{{ param.description }}"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão de executar -->
+      <button
+        (click)="executeCommand()"
+        [disabled]="loading || !deviceId || !selectedOperation"
+        class="execute-btn"
+      >
+        {{ loading ? '⏳ Executando...' : '▶️ Executar Comando' }}
+      </button>
+    </div>
+
+    <!-- Resultado da execução -->
+    <div *ngIf="executionResult" class="result-box">
+      <h3>Resultado da Execução</h3>
+      <p><strong>Sucesso:</strong> {{ executionResult.success ? '✅ Sim' : '❌ Não' }}</p>
+      <p *ngIf="executionResult.response">
+        <strong>Resposta:</strong> {{ executionResult.response }}
+      </p>
+      <p *ngIf="executionResult.error">
+        <strong>Erro:</strong> {{ executionResult.error }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Carregando ou não encontrado -->
+  <div *ngIf="!device && !errorMessage && deviceId" class="loading">
+    <p>Carregando detalhes do dispositivo...</p>
+  </div>
+</div>
+
+<style scoped>
+  .device-detail-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .device-id {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+  }
+
+  .error-box {
+    background-color: #ffcccc;
+    border: 1px solid #cc0000;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    color: #cc0000;
+  }
+
+  .success-box {
+    background-color: #ccffcc;
+    border: 1px solid #00cc00;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    color: #00cc00;
+  }
+
+  .device-info {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 4px;
+    margin-top: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  select,
+  input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .execute-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+
+  .execute-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+  }
+
+  .execute-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .result-box {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+  }
+
+  .parameters-section {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+</style>

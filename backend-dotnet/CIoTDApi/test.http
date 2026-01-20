@@ -1,19 +1,26 @@
 <!-- Arquivo para testar a API via VS Code REST Client -->
+@baseUrl = http://localhost:5141
+@agentUrl = http://localhost:8000
+
+# Observações:
+# - Se estiver rodando via Docker e seu backend expõe 5001, troque `@baseUrl` para http://localhost:5001
+# - Em Development com HTTPS, a `launchSettings.json` também expõe https://localhost:7106
 
 ### 1. Verificar saúde do Backend
-GET http://localhost:5000/health
+GET {{baseUrl}}/health
 Accept: application/json
 
 ###
 
 ### 2. Verificar saúde do Device Agent
-GET http://localhost:8000/api/health
+GET {{agentUrl}}/api/health
 Accept: application/json
 
 ###
 
 ### 3. Login como Admin
-POST http://localhost:5000/api/auth/login
+# @name login
+POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
@@ -21,44 +28,45 @@ Content-Type: application/json
   "password": "admin123"
 }
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+###
+### Token obtido automaticamente: {{login.response.body.accessToken}}
 
 ###
 
 ### 4. Validar Token
-POST http://localhost:5000/api/auth/validate
-Authorization: Bearer {{token}}
+POST {{baseUrl}}/api/auth/validate
+Authorization: Bearer {{login.response.body.accessToken}}
 Content-Type: application/json
 
 ###
 
 ### 5. Listar Dispositivos
-GET http://localhost:5000/api/device
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/api/device
+Authorization: Bearer {{login.response.body.accessToken}}
 
 ###
 
 ### 6. Obter Detalhes - Sensor de Solo
-GET http://localhost:5000/api/device/sensor-soil-001
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/api/device/sensor-soil-001
+Authorization: Bearer {{login.response.body.accessToken}}
 
 ###
 
 ### 7. Obter Detalhes - Estação Meteorológica
-GET http://localhost:5000/api/device/sensor-weather-001
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/api/device/sensor-weather-001
+Authorization: Bearer {{login.response.body.accessToken}}
 
 ###
 
 ### 8. Obter Detalhes - Sistema de Irrigação
-GET http://localhost:5000/api/device/irrigation-system-001
-Authorization: Bearer {{token}}
+GET {{baseUrl}}/api/device/irrigation-system-001
+Authorization: Bearer {{login.response.body.accessToken}}
 
 ###
 
 ### 9. Executar Comando - Ler Umidade
-POST http://localhost:5000/api/device/sensor-soil-001/execute
-Authorization: Bearer {{token}}
+POST {{baseUrl}}/api/device/sensor-soil-001/execute
+Authorization: Bearer {{login.response.body.accessToken}}
 Content-Type: application/json
 
 {
@@ -71,14 +79,14 @@ Content-Type: application/json
 ###
 
 ### 10. Executar Comando - Definir Limiar
-POST http://localhost:5000/api/device/sensor-soil-001/execute
-Authorization: Bearer {{token}}
+POST {{baseUrl}}/api/device/sensor-soil-001/execute
+Authorization: Bearer {{login.response.body.accessToken}}
 Content-Type: application/json
 
 {
   "operation": "SET_THRESHOLD",
   "parameters": {
-    "threshold": "65",
+    "threshold": 65,
     "unit": "percent"
   }
 }
@@ -86,8 +94,8 @@ Content-Type: application/json
 ###
 
 ### 11. Executar Comando - Ler Temperatura
-POST http://localhost:5000/api/device/sensor-weather-001/execute
-Authorization: Bearer {{token}}
+POST {{baseUrl}}/api/device/sensor-weather-001/execute
+Authorization: Bearer {{login.response.body.accessToken}}
 Content-Type: application/json
 
 {
@@ -98,8 +106,8 @@ Content-Type: application/json
 ###
 
 ### 12. Criar novo Dispositivo
-POST http://localhost:5000/api/device
-Authorization: Bearer {{token}}
+POST {{baseUrl}}/api/device
+Authorization: Bearer {{login.response.body.accessToken}}
 Content-Type: application/json
 
 {
@@ -113,8 +121,8 @@ Content-Type: application/json
 ###
 
 ### 13. Atualizar Dispositivo
-PUT http://localhost:5000/api/device/sensor-test-001
-Authorization: Bearer {{token}}
+PUT {{baseUrl}}/api/device/sensor-test-001
+Authorization: Bearer {{login.response.body.accessToken}}
 Content-Type: application/json
 
 {
@@ -128,7 +136,7 @@ Content-Type: application/json
 ###
 
 ### 14. Deletar Dispositivo
-DELETE http://localhost:5000/api/device/sensor-test-001
-Authorization: Bearer {{token}}
+DELETE {{baseUrl}}/api/device/sensor-test-001
+Authorization: Bearer {{login.response.body.accessToken}}
 
 ###

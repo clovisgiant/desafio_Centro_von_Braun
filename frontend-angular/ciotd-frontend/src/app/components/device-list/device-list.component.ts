@@ -42,7 +42,16 @@ export class DeviceListComponent implements OnInit {
   }
 
   selectDevice(deviceId: string): void {
-    console.log("Navegando para device:", deviceId);
+    console.log("Selecionando device com ID:", deviceId);
+    console.log("Tipo do deviceId:", typeof deviceId);
+    console.log("DeviceId é undefined?", deviceId === undefined);
+    console.log("DeviceId é null?", deviceId === null);
+    
+    if (!deviceId) {
+      console.error("Device ID está vazio ou undefined");
+      return;
+    }
+    
     this.router.navigate(["/device", deviceId]);
   }
 
