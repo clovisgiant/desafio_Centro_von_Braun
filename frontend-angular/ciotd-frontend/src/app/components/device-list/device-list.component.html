@@ -12,10 +12,15 @@
     <div
       *ngFor="let device of devices"
       class="device-card"
+      [class]="'device-card ' + getDeviceColor(device)"
       (click)="selectDevice(device)"
     >
-      <h3>{{ device }}</h3>
-      <p>ID: {{ device }}</p>
+      <div class="device-icon">{{ getDeviceIcon(device) }}</div>
+      <div class="device-info">
+        <h3>{{ device }}</h3>
+        <p class="device-type">{{ getDeviceType(device) }}</p>
+        <span class="device-status">● Online</span>
+      </div>
     </div>
   </div>
 </div>

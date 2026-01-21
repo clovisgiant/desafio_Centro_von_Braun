@@ -55,6 +55,27 @@ export class DeviceListComponent implements OnInit {
     this.router.navigate(["/device", deviceId]);
   }
 
+  getDeviceIcon(deviceId: string): string {
+    if (deviceId.includes('soil')) return '🌱';
+    if (deviceId.includes('weather')) return '🌤️';
+    if (deviceId.includes('irrigation')) return '💧';
+    return '📡';
+  }
+
+  getDeviceType(deviceId: string): string {
+    if (deviceId.includes('soil')) return 'Sensor de Solo';
+    if (deviceId.includes('weather')) return 'Estação Meteorológica';
+    if (deviceId.includes('irrigation')) return 'Sistema de Irrigação';
+    return 'Dispositivo IoT';
+  }
+
+  getDeviceColor(deviceId: string): string {
+    if (deviceId.includes('soil')) return 'soil';
+    if (deviceId.includes('weather')) return 'weather';
+    if (deviceId.includes('irrigation')) return 'irrigation';
+    return 'default';
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(["/login"]);
