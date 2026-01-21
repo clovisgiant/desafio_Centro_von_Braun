@@ -43,11 +43,27 @@
       <input
         [(ngModel)]="command"
         type="text"
-        placeholder="ex: GET, SET, STATUS"
+        placeholder="Selecione um comando acima"
+        readonly
       />
     </div>
 
-    <div class="form-group">
+    <!-- Parâmetros dinâmicos se o comando tiver definição -->
+    <div *ngIf="getCommandParameters().length > 0" class="parameters-section">
+      <h3>Parâmetros:</h3>
+      <div *ngFor="let param of getCommandParameters()" class="form-group">
+        <label>{{ param.name }}:</label>
+        <input
+          [(ngModel)]="commandParams[param.name]"
+          type="text"
+          [placeholder]="param.description || 'Digite o valor'"
+        />
+        <small *ngIf="param.description" class="param-hint">{{ param.description }}</small>
+      </div>
+    </div>
+
+    <!-- Fallback para comandos sem definição de parâmetros -->
+    <div *ngIf="command && getCommandParameters().length === 0" class="form-group">
       <label>Parâmetros (separados por espaço):</label>
       <input
         [(ngModel)]="parameters"
@@ -60,7 +76,7 @@
       class="execute-btn"
       (click)="executeCommand()"
       [disabled]="!command || !device || executing"
-      [title]="!device ? 'Aguarde o carregamento do dispositivo' : (!command ? 'Digite um comando' : 'Executar comando')"
+      [title]="!device ? 'Aguarde o carregamento do dispositivo' : (!command ? 'Selecione um comando' : 'Executar comando')"
     >
       {{ executing ? 'Executando...' : 'Executar' }}
     </button>

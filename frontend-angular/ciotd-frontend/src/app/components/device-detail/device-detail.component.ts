@@ -21,6 +21,8 @@ export class DeviceDetailComponent implements OnInit {
   executing = false;
   result = "";
   resultError = "";
+  selectedCommand: any = null;
+  commandParams: { [key: string]: string } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -107,9 +109,14 @@ export class DeviceDetailComponent implements OnInit {
     this.result = "";
     this.resultError = "";
 
-    // Parse parameters from space-separated string into object
-    const paramPairs: { [key: string]: string } = {};
-    if (this.parameters.trim()) {
+    // Usa os parâmetros dinâmicos se disponíveis, senão usa o campo de texto livre
+    let paramPairs: { [key: string]: string } = {};
+    
+    if (this.selectedCommand?.command?.parameters && this.selectedCommand.command.parameters.length > 0) {
+      // Usa os parâmetros estruturados
+      paramPairs = { ...this.commandParams };
+    } else if (this.parameters.trim()) {
+      // Fallback para parâmetros de texto livre
       const parts = this.parameters.split(" ").filter((p) => p.trim() !== "");
       parts.forEach((part, index) => {
         paramPairs[`param${index + 1}`] = part;
@@ -144,10 +151,27 @@ export class DeviceDetailComponent implements OnInit {
 
   selectCommand(cmd: any) {
     this.command = cmd.operation;
+    this.selectedCommand = cmd;
     this.parameters = "";
+    this.commandParams = {};
     this.result = "";
     this.resultError = "";
-    console.log('Comando selecionado:', cmd.operation);
+    
+    // Inicializa os parâmetros se o comando tiver definição
+    if (cmd.command && cmd.command.parameters) {
+      cmd.command.parameters.forEach((param: any) => {
+        this.commandParams[param.name] = '';
+      });
+    }
+    
+    console.log('Comando selecionado:', cmd.operation, 'Parâmetros:', cmd.command?.parameters);
+  }
+
+  getCommandParameters(): any[] {
+    if (this.selectedCommand?.command?.parameters) {
+      return this.selectedCommand.command.parameters;
+    }
+    return [];
   }
 
   back() {
