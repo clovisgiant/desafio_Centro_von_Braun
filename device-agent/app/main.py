@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import os
+import random
 from typing import Dict, Any, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -10,6 +12,11 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+# Modo de simulação
+MOCK_MODE = os.getenv("MOCK_DEVICES", "true").lower() == "true"
+if MOCK_MODE:
+    logger.info("🔧 Modo MOCK ativado - dispositivos serão simulados")
 
 app = FastAPI(
     title="CIoTD Device Agent",
@@ -32,6 +39,38 @@ class ExecuteCommandResponse(BaseModel):
     error: Optional[str] = None
 
 
+def mock_telnet_response(command: str, params: Dict[str, Any]) -> str:
+    """
+    Retorna resposta simulada para comandos
+    
+    Args:
+        command: Comando a executar
+        params: Parâmetros do comando
+        
+    Returns:
+        Resposta simulada
+    """
+    logger.info(f"[MOCK] Executando comando simulado: {command} com parâmetros {params}")
+    
+    # Respostas simuladas baseadas no comando
+    mock_responses = {
+        "READ_TEMP": f"OK TEMP={random.randint(15, 35)}.{random.randint(0, 9)}C",
+        "READ_HUM": f"OK HUMIDITY={random.randint(30, 80)}%",
+        "READ_RAIN": f"OK RAINFALL={random.randint(0, 100)}mm",
+        "READ": f"OK VALUE={random.randint(20, 80)}",
+        "STATUS": f"OK ZONE={params.get('param1', '1')} STATUS=ACTIVE",
+        "START": f"OK ZONE={params.get('param1', '1')} STARTED DURATION={params.get('param2', '30')}min",
+        "STOP": f"OK ZONE={params.get('param1', '1')} STOPPED",
+        "CONFIGURE": f"OK THRESHOLD={params.get('param1', '50')} CONFIGURED"
+    }
+    
+    # Retorna resposta baseada no comando ou resposta genérica
+    response = mock_responses.get(command, f"OK {command} EXECUTED")
+    logger.info(f"[MOCK] Resposta simulada: {response}")
+    
+    return response
+
+
 async def send_telnet_command(
     host: str, 
     port: int, 
@@ -45,6 +84,10 @@ async def send_telnet_command(
     Formato: comando param1 param2 ... \r
     Resposta: string terminada em \r
     """
+    # Se estiver em modo mock, retorna dados simulados
+    if MOCK_MODE:
+        return mock_telnet_response(command, params)
+    
     # Construir string de comando: comando + params separados por espaço + \r
     param_values = [str(v) for v in params.values()] if params else []
     command_str = command

@@ -43,7 +43,10 @@ export class DeviceService {
     // Encode the deviceId to handle special characters
     const encodedId = encodeURIComponent(deviceId);
     const url = `${environment.apiUrl}/device/${encodedId}/execute`;
-    const request: ExecuteCommandRequest = { operation, parameters };
+    const request: ExecuteCommandRequest = { 
+      operation: operation, 
+      parameters: parameters 
+    };
     console.log('Executing command on URL:', url, 'with request:', request);
     return this.http.post<ExecuteCommandResponse>(url, request, { headers: this.getHeaders() });
   }

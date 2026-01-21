@@ -1,6 +1,8 @@
 """Serviço de comunicação assíncrona com dispositivos via Telnet/TCP"""
 import asyncio
 import logging
+import os
+import random
 from typing import Tuple, Optional
 from urllib.parse import urlparse
 
@@ -18,6 +20,9 @@ class TelnetDeviceClient:
             timeout: Tempo máximo de espera por resposta (em segundos)
         """
         self.timeout = timeout
+        self.mock_mode = os.getenv("MOCK_DEVICES", "true").lower() == "true"
+        if self.mock_mode:
+            logger.info("Modo MOCK ativado - dispositivos serão simulados")
 
     async def execute_command(
         self,
@@ -36,6 +41,10 @@ class TelnetDeviceClient:
         Returns:
             Tupla (sucesso, resposta)
         """
+        # Se estiver em modo mock, retorna dados simulados
+        if self.mock_mode:
+            return self._execute_mock_command(command, parameters)
+        
         try:
             # Extrai host e porta da URL
             host, port = self._parse_device_url(device_url)
@@ -167,3 +176,34 @@ class TelnetDeviceClient:
 
         # Adiciona terminador \r
         return command_string + '\r'
+
+    def _execute_mock_command(self, command: str, parameters: list[str]) -> Tuple[bool, str]:
+        """
+        Executa comando em modo simulado (mock)
+        
+        Args:
+            command: Comando a executar
+            parameters: Lista de parâmetros
+            
+        Returns:
+            Tupla (sucesso, resposta simulada)
+        """
+        logger.info(f"[MOCK] Executando comando simulado: {command} {' '.join(parameters)}")
+        
+        # Respostas simuladas baseadas no comando
+        mock_responses = {
+            "READ_TEMP": f"OK TEMP={random.randint(15, 35)}.{random.randint(0, 9)}C",
+            "READ_HUM": f"OK HUMIDITY={random.randint(30, 80)}%",
+            "READ_RAIN": f"OK RAINFALL={random.randint(0, 100)}mm",
+            "READ": f"OK VALUE={random.randint(20, 80)}",
+            "STATUS": f"OK ZONE={parameters[0] if parameters else '1'} STATUS=ACTIVE",
+            "START": f"OK ZONE={parameters[0] if parameters else '1'} STARTED DURATION={parameters[1] if len(parameters) > 1 else '30'}min",
+            "STOP": f"OK ZONE={parameters[0] if parameters else '1'} STOPPED",
+            "CONFIGURE": f"OK THRESHOLD={parameters[0] if parameters else '50'} CONFIGURED"
+        }
+        
+        # Retorna resposta baseada no comando ou resposta genérica
+        response = mock_responses.get(command, f"OK {command} EXECUTED")
+        logger.info(f"[MOCK] Resposta simulada: {response}")
+        
+        return True, response
