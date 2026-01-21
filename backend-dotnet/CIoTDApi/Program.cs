@@ -3,7 +3,6 @@ using System.Text;
 using CIoTDApi.Application.Interfaces;
 using CIoTDApi.Application.Services;
 using CIoTDApi.Infrastructure.Authentication;
-using CIoTDApi.Infrastructure.Http;
 using CIoTDApi.Presentation.Middleware;
 using Microsoft.IdentityModel.Tokens;
 
@@ -51,7 +50,7 @@ builder.Services.AddAuthentication(options =>
 // Dependency Injection
 builder.Services.AddScoped<IAuthenticationService, JwtAuthenticationService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
-builder.Services.AddHttpClient<IDeviceAgentService, DeviceAgentService>();
+builder.Services.AddHttpClient<IDeviceAgentService, CIoTDApi.Infrastructure.Http.DeviceAgentService>();
 builder.Services.AddLogging();
 
 var app = builder.Build();
