@@ -1,0 +1,198 @@
+===============================================
+   COMANDOS DOCKER-COMPOSE - GUIA RÁPIDO
+===============================================
+
+📦 COMANDOS BÁSICOS
+-------------------
+
+docker-compose up
+└─ Inicia todos os containers definidos no docker-compose.yml
+   Os containers rodam em primeiro plano (você vê os logs)
+
+docker-compose up -d
+└─ Inicia todos os containers em modo "detached" (segundo plano)
+   Os containers rodam em background, liberando o terminal
+
+docker-compose up --build
+└─ Reconstrói as imagens Docker e inicia os containers
+   Útil quando você modifica o código e quer aplicar as mudanças
+
+docker-compose up --build -d
+└─ Reconstrói as imagens e inicia em background
+   Combina reconstrução + execução em segundo plano
+
+docker-compose down
+└─ Para e remove todos os containers, redes e volumes
+   Limpa tudo, mas mantém as imagens Docker
+
+
+🔄 GERENCIAMENTO DE CONTAINERS
+-------------------------------
+
+docker-compose start
+└─ Inicia containers que já foram criados mas estão parados
+   Não recria os containers
+
+docker-compose stop
+└─ Para os containers sem removê-los
+   Você pode reiniciá-los com "start"
+
+docker-compose restart
+└─ Reinicia todos os containers
+   Útil quando você quer aplicar mudanças de configuração
+
+docker-compose restart [nome-do-serviço]
+└─ Reinicia apenas um serviço específico
+   Exemplo: docker-compose restart frontend
+
+
+🔨 RECONSTRUÇÃO E BUILD
+-----------------------
+
+docker-compose build
+└─ Reconstrói as imagens Docker sem iniciar os containers
+   Útil quando você só quer compilar as mudanças
+
+docker-compose build --no-cache
+└─ Reconstrói as imagens ignorando o cache do Docker
+   Força uma reconstrução completa do zero
+
+docker-compose up --build -d [nome-do-serviço]
+└─ Reconstrói e inicia apenas um serviço específico
+   Exemplo: docker-compose up --build -d backend
+
+
+📊 VISUALIZAÇÃO E LOGS
+----------------------
+
+docker-compose ps
+└─ Lista todos os containers do projeto e seus status
+   Mostra se estão rodando, parados, etc.
+
+docker-compose logs
+└─ Mostra os logs de todos os containers
+   Exibe tudo que foi impresso no console
+
+docker-compose logs -f
+└─ Mostra os logs em tempo real (modo "follow")
+   Continua exibindo novas mensagens conforme aparecem
+
+docker-compose logs [nome-do-serviço]
+└─ Mostra logs de um serviço específico
+   Exemplo: docker-compose logs backend
+
+docker-compose logs --tail 50 [nome-do-serviço]
+└─ Mostra apenas as últimas 50 linhas de log
+   Útil para ver logs recentes sem poluir o terminal
+
+
+🧹 LIMPEZA E MANUTENÇÃO
+------------------------
+
+docker-compose down -v
+└─ Para containers e remove volumes de dados
+   ⚠️ CUIDADO: Apaga dados persistentes (bancos de dados, etc)
+
+docker-compose down --rmi all
+└─ Para containers e remove todas as imagens relacionadas
+   Libera espaço em disco
+
+docker system prune -a
+└─ Remove todos os containers, imagens e volumes não utilizados
+   Limpeza geral do Docker (não é específico do compose)
+
+
+🔧 COMANDOS AVANÇADOS
+---------------------
+
+docker-compose exec [serviço] [comando]
+└─ Executa um comando dentro de um container em execução
+   Exemplo: docker-compose exec backend bash
+
+docker-compose run [serviço] [comando]
+└─ Cria um novo container temporário e executa um comando
+   Útil para executar scripts ou comandos únicos
+
+docker-compose config
+└─ Valida e mostra a configuração final do docker-compose.yml
+   Útil para debugar problemas de sintaxe
+
+docker-compose pull
+└─ Baixa as versões mais recentes das imagens
+   Atualiza imagens de registros remotos
+
+
+📝 EXEMPLOS PRÁTICOS PARA ESTE PROJETO
+---------------------------------------
+
+# Iniciar todo o projeto pela primeira vez
+docker-compose up --build -d
+
+# Ver se tudo está rodando
+docker-compose ps
+
+# Ver logs do backend
+docker-compose logs -f backend
+
+# Ver logs do frontend
+docker-compose logs -f frontend
+
+# Reiniciar apenas o frontend após mudanças
+docker-compose restart frontend
+
+# Reconstruir e reiniciar o device-agent
+docker-compose up --build -d device-agent
+
+# Parar tudo
+docker-compose down
+
+# Parar tudo e limpar volumes (reiniciar do zero)
+docker-compose down -v
+
+
+🎯 WORKFLOW RECOMENDADO
+------------------------
+
+1. Primeira execução:
+   docker-compose up --build -d
+
+2. Durante desenvolvimento:
+   - Mudou código do frontend: docker-compose restart frontend
+   - Mudou código do backend: docker-compose restart backend
+   - Mudou Dockerfile: docker-compose up --build -d [serviço]
+
+3. Ver o que está acontecendo:
+   docker-compose logs -f [serviço]
+
+4. Finalizar o dia:
+   docker-compose down
+
+5. Recomeçar no dia seguinte:
+   docker-compose up -d
+
+
+💡 DICAS IMPORTANTES
+--------------------
+
+✅ Use "-d" para não travar o terminal
+✅ Use "--build" quando mudar código ou Dockerfile
+✅ Use "restart" para mudanças simples (mais rápido)
+✅ Use "logs -f" para debugar problemas em tempo real
+✅ Use "ps" para ver status dos containers
+
+⚠️  Evite "down -v" em produção (perde dados)
+⚠️  "Ctrl+C" só funciona se NÃO usou "-d"
+
+
+🌐 URLs DO PROJETO
+------------------
+
+Frontend:      http://localhost:4200
+Backend API:   http://localhost:5001
+Device Agent:  http://localhost:8001
+
+
+===============================================
+Criado em: Janeiro 2026
+Projeto: CIoTD - Centro von Braun
+===============================================

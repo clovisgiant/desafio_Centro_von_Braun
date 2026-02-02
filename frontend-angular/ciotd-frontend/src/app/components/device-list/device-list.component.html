@@ -1,26 +1,73 @@
+<!-- ======================================================================================== -->
+<!-- TEMPLATE DO COMPONENTE - device-list.component.html -->
+<!-- ======================================================================================== -->
+<!-- PONTO-CHAVE #5 PARA A ENTREVISTA - DATA BINDING NO TEMPLATE -->
+<!-- Este template demonstra como os dados da API são EXIBIDOS na tela -->
+<!-- ======================================================================================== -->
+
 <div class="container">
   <div class="header">
     <h1>Dispositivos CIoTD</h1>
+    
+    <!-- EVENT BINDING: (click) escuta evento de clique -->
+    <!-- Chama o método logout() do component quando usuário clica -->
     <button class="logout-btn" (click)="logout()">Sair</button>
   </div>
 
+  <!-- ====================================================================================== -->
+  <!-- CONDICIONAL: *ngIf -->
+  <!-- ====================================================================================== -->
+  <!-- Mostra este elemento APENAS quando loading === true -->
+  <!-- Enquanto aguarda resposta da API, exibe mensagem de carregamento -->
   <div *ngIf="loading" class="loading">Carregando dispositivos...</div>
 
+  <!-- Mostra este elemento APENAS quando error não está vazio -->
+  <!-- INTERPOLAÇÃO: {{ error }} exibe o valor da variável 'error' do component -->
   <div *ngIf="error" class="error">{{ error }}</div>
 
+  <!-- ====================================================================================== -->
+  <!-- LOOP: *ngFor -->
+  <!-- ====================================================================================== -->
+  <!-- PONTO-CHAVE: Aqui os dados da API são RENDERIZADOS! -->
+  <!-- *ngFor itera sobre o array 'devices' que foi preenchido pela API -->
+  <!-- Para cada item, cria uma cópia do elemento <div> -->
   <div class="device-grid">
+    <!-- IMPORTANTE: 'devices' aqui é a propriedade do component que recebeu dados da API -->
+    <!-- let device cria uma variável local para cada item do array -->
     <div
       *ngFor="let device of devices"
       class="device-card"
+      
+      <!-- PROPERTY BINDING: [class] vincula classe CSS dinamicamente -->
       [class]="'device-card ' + getDeviceColor(device)"
+      
+      <!-- EVENT BINDING: Chama selectDevice() passando o ID do dispositivo -->
       (click)="selectDevice(device)"
     >
+      <!-- INTERPOLAÇÃO: {{ }} chama método e exibe resultado -->
+      <!-- getDeviceIcon(device) retorna emoji baseado no tipo do device -->
       <div class="device-icon">{{ getDeviceIcon(device) }}</div>
+      
       <div class="device-info">
+        <!-- INTERPOLAÇÃO: Exibe o ID do dispositivo vindo da API -->
+        <!-- Exemplo: "sensor-soil-001" -->
         <h3>{{ device }}</h3>
+        
+        <!-- INTERPOLAÇÃO: Chama método que retorna nome amigável -->
         <p class="device-type">{{ getDeviceType(device) }}</p>
+        
         <span class="device-status">● Online</span>
       </div>
     </div>
   </div>
 </div>
+
+<!-- ======================================================================================== -->
+<!-- RESUMO DO FLUXO DE VINCULAÇÃO NESTE TEMPLATE: -->
+<!-- ======================================================================================== -->
+<!-- 1. Component carrega dados: this.devices = ["sensor-001", "sensor-002", ...] -->
+<!-- 2. Angular detecta mudança na propriedade 'devices' -->
+<!-- 3. *ngFor recria os elementos <div> para cada item do array -->
+<!-- 4. {{ device }} interpola o valor dentro do HTML -->
+<!-- 5. Usuário vê a lista renderizada na tela -->
+<!-- ======================================================================================== -->
